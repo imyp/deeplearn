@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "deeplearn"
+version = "0.1.0"
+description = ""
+authors = ["intimyp <intimyp@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = "^2.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+download = "deeplearn.papers:download_papers"
