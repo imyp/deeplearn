@@ -8,8 +8,15 @@ CWD = pathlib.Path.cwd()
 PAPERS_PATH = CWD / "papers.txt"
 OUT_PAPERS_DIR = CWD / "papers"
 OUT_PAPERS_DIR.mkdir(exist_ok=True)
+HELP_MESSAGE = """usage: download [--force|--help]
 
-def split_link_file_pair(link_file_pair: str)->tuple[str, str]:
+--force: Force download of files.
+
+--help: Show this help message.
+"""
+
+
+def split_link_file_pair(link_file_pair: str) -> tuple[str, str]:
     items = link_file_pair.split(",")
     if len(items) != 2:
         print("Could not split the following line in file: \n" + link_file_pair)
@@ -24,10 +31,9 @@ def split_link_file_pair(link_file_pair: str)->tuple[str, str]:
     return file, link
 
 
-
-def parse_paper_links()-> dict[str, str]:
+def parse_paper_links() -> dict[str, str]:
     if not PAPERS_PATH.exists():
-        print("Could not find \"papers.txt\" file in current working directory.")
+        print('Could not find "papers.txt" file in current working directory.')
         sys.exit(1)
     paper_collection: dict[str, str] = {}
     link_file_pairs = PAPERS_PATH.read_text().splitlines()
@@ -38,21 +44,42 @@ def parse_paper_links()-> dict[str, str]:
             sys.exit(1)
         paper_collection[file] = link
     return paper_collection
-        
 
 
-def save_paper(file: str, link: str):
-    paper_path = OUT_PAPERS_DIR / file
+def download_paper(link: str) -> bytes:
     print("Downloading paper: " + link)
     response = request.urlopen(link)
     if response.status != 200:
         print("Status code not ok for " + link)
         sys.exit(1)
-    print("saving to " + str(paper_path))
-    paper_path.write_bytes(response.read())
+    return response.read()
+
+
+def parse_arguments():
+    if len(sys.argv) == 1:
+        return True
+    if len(sys.argv) != 2:
+        print("Too many arguments\n")
+        print(HELP_MESSAGE)
+        sys.exit(1)
+    option = sys.argv[1]
+    if option == "--help":
+        print(HELP_MESSAGE)
+        sys.exit(0)
+    if option == "--force":
+        return False
+    print("Wrong argument\n")
+    print(HELP_MESSAGE)
+    sys.exit(1)
 
 
 def download_papers():
+    check = parse_arguments()
     paper_links = parse_paper_links()
     for file, link in paper_links.items():
-        save_paper(file, link)
+        paper_path = OUT_PAPERS_DIR / file
+        if check and paper_path.exists():
+            print("Skipping already existing file: " + str(paper_path))
+            continue
+        paper_bytes = download_paper(link)
+        paper_path.write_bytes(paper_bytes)
