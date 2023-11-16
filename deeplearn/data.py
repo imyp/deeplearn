@@ -91,3 +91,15 @@ class SphereDataset(data.Dataset[tuple[torch.Tensor, torch.Tensor]]):
         sphere = self._spheres[index]
         sphere_volume = create_volumetric_sphere(sphere)
         return sphere_volume, sphere.to_tensor()
+
+
+Loader = data.DataLoader
+
+T = typing.TypeVar("T")
+
+
+def iter_loader(loader: Loader[T]) -> typing.Iterable[T]:
+    """Iterate through a data loader while preserving types."""
+    for b in loader:
+        batch: T = b
+        yield batch
