@@ -4,8 +4,8 @@ import torch.optim as optim
 
 import deeplearn.data as data
 import deeplearn.model as model
-import deeplearn.train as train
 import deeplearn.plot as plot
+import deeplearn.train as train
 
 learning_rate = 1e-3
 batch_size = 10
@@ -18,7 +18,7 @@ loss_function: model.TypedModel = (
 )  # pyright: ignore[reportGeneralTypeIssues]
 # optimizer = optim.SGD(net.parameters(), lr=learning_rate)
 optimizer = optim.Adam(net.parameters(), lr=learning_rate)
-model_name="relu-linear-stack.pt"
+model_name = "relu-linear-stack.pt"
 loss_name = "epoch_train_test_adam.data"
 train.train_test_loops(
     epochs,
@@ -28,6 +28,6 @@ train.train_test_loops(
     net,
     loss_function,
     model_name,
-    loss_name
+    loss_name,
 )
 plot.plot_test_train_data(loss_name)

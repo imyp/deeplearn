@@ -24,14 +24,17 @@ def plot_volume(volume_data: torch.Tensor) -> None:
     f = graph_objects.Figure(data=d)
     f.show()  # pyright: ignore[reportUnknownMemberType]
 
+
 def plot_test_train_data(filename: str):
-    t = torch.load(filename) # pyright: ignore[reportUnknownMemberType]
-    figure = pyplot.figure() # pyright: ignore[reportUnknownMemberType]
-    ax = figure.add_subplot() # pyright: ignore[reportUnknownMemberType]
-    epochs = t[:,0].numpy()
-    train_loss = t[:,1].numpy()
-    test_loss = t[:,2].numpy()
-    ax.plot(epochs, train_loss, label="train") # pyright: ignore[reportUnknownMemberType]
-    ax.plot(epochs, test_loss, label="test") # pyright: ignore[reportUnknownMemberType]
-    ax.legend() # pyright: ignore[reportUnknownMemberType]
-    pyplot.show() # pyright: ignore[reportUnknownMemberType]
+    t = torch.load(filename)  # pyright: ignore[reportUnknownMemberType]
+    figure = pyplot.figure()  # pyright: ignore[reportUnknownMemberType]
+    ax = figure.add_subplot()  # pyright: ignore[reportUnknownMemberType]
+    epochs = t[:, 0].numpy()
+    train_loss = t[:, 1].numpy()
+    test_loss = t[:, 2].numpy()
+    ax.plot(  # pyright: ignore[reportUnknownMemberType]
+        epochs, train_loss, label="train"
+    )
+    ax.plot(epochs, test_loss, label="test")  # pyright: ignore[reportUnknownMemberType]
+    ax.legend()  # pyright: ignore[reportUnknownMemberType]
+    pyplot.show()  # pyright: ignore[reportUnknownMemberType]
