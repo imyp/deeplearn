@@ -1,5 +1,6 @@
 """For plotting data"""
 
+import matplotlib.axes as axes
 import matplotlib.pyplot as pyplot
 import plotly.graph_objects as graph_objects  # pyright: ignore[reportMissingTypeStubs]
 import torch
@@ -25,16 +26,32 @@ def plot_volume(volume_data: torch.Tensor) -> None:
     f.show()  # pyright: ignore[reportUnknownMemberType]
 
 
-def plot_test_train_data(filename: str):
-    t = torch.load(filename)  # pyright: ignore[reportUnknownMemberType]
+def loss_files(filenames: list[str], suffixes: list[str]):
     figure = pyplot.figure()  # pyright: ignore[reportUnknownMemberType]
     ax = figure.add_subplot()  # pyright: ignore[reportUnknownMemberType]
-    epochs = t[:, 0].numpy()
-    train_loss = t[:, 1].numpy()
-    test_loss = t[:, 2].numpy()
+    for file_name, suffix in zip(filenames, suffixes):
+        t = torch.load(file_name)  # pyright: ignore[reportUnknownMemberType]
+        _plot_data_to_ax(ax, t, suffix)
+    ax.legend()  # pyright: ignore[reportUnknownMemberType]
+    pyplot.show()  # pyright: ignore[reportUnknownMemberType]
+
+
+def _plot_data_to_ax(ax: axes.Axes, tensor: torch.Tensor, suffix: str):
+    epochs = tensor[:, 0].numpy()
+    train_loss = tensor[:, 1].numpy()
+    test_loss = tensor[:, 2].numpy()
     ax.plot(  # pyright: ignore[reportUnknownMemberType]
-        epochs, train_loss, label="train"
+        epochs, train_loss, label=f"train-{suffix}"
     )
-    ax.plot(epochs, test_loss, label="test")  # pyright: ignore[reportUnknownMemberType]
+    ax.plot(
+        epochs, test_loss, label=f"test-{suffix}"
+    )  # pyright: ignore[reportUnknownMemberType]
+
+
+def loss_file(filename: str):
+    figure = pyplot.figure()  # pyright: ignore[reportUnknownMemberType]
+    ax = figure.add_subplot()  # pyright: ignore[reportUnknownMemberType]
+    t = torch.load(filename)  # pyright: ignore[reportUnknownMemberType]
+    _plot_data_to_ax(ax, t, suffix="")
     ax.legend()  # pyright: ignore[reportUnknownMemberType]
     pyplot.show()  # pyright: ignore[reportUnknownMemberType]
