@@ -10,6 +10,8 @@ python = "^3.11"
 torch = {version = "^2.1.1+cpu", source = "pytorch"}
 numpy = "^1.26.2"
 matplotlib = "^3.8.1"
+plotly = "^5.18.0"
+kaleido = "0.2.1"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -27,3 +29,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 download = "deeplearn.papers:download_papers"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+strict = true
