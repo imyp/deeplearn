@@ -260,6 +260,23 @@ ssh = ["paramiko"]
 tqdm = ["tqdm"]
 
 [[package]]
+name = "isort"
+version = "5.12.0"
+description = "A Python utility / library to sort Python imports."
+optional = false
+python-versions = ">=3.8.0"
+files = [
+    {file = "isort-5.12.0-py3-none-any.whl", hash = "sha256:f84c2818376e66cf843d497486ea8fed8700b340f308f076c6fb1229dff318b6"},
+    {file = "isort-5.12.0.tar.gz", hash = "sha256:8bef7dde241278824a6d83f44a544709b065191b95b6e50894bdc722fcba0504"},
+]
+
+[package.extras]
+colors = ["colorama (>=0.4.3)"]
+pipfile-deprecated-finder = ["pip-shims (>=0.5.2)", "pipreqs", "requirementslib"]
+plugins = ["setuptools"]
+requirements-deprecated-finder = ["pip-api", "pipreqs"]
+
+[[package]]
 name = "jinja2"
 version = "3.1.2"
 description = "A very fast and expressive template engine."
@@ -846,4 +863,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "afaf24a238d60b465cd5018bf074e49c959146db6d49720576900a7e4002fa4c"
+content-hash = "a055c4fb2aec221b41e86582812d11fb5108a4e900aee00ec0a6fbd3bf7635b2"
