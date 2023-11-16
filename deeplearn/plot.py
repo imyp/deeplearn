@@ -43,9 +43,9 @@ def _plot_data_to_ax(ax: axes.Axes, tensor: torch.Tensor, suffix: str):
     ax.plot(  # pyright: ignore[reportUnknownMemberType]
         epochs, train_loss, label=f"train-{suffix}"
     )
-    ax.plot(
+    ax.plot(  # pyright: ignore[reportUnknownMemberType]
         epochs, test_loss, label=f"test-{suffix}"
-    )  # pyright: ignore[reportUnknownMemberType]
+    )
 
 
 def loss_file(filename: str):
