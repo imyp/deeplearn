@@ -2,3 +2,4 @@ layernorm.pdf,https://arxiv.org/pdf/1607.06450.pdf
 transformers.pdf,https://arxiv.org/pdf/1706.03762.pdf
 resnets.pdf,https://arxiv.org/pdf/1512.03385.pdf
 batchnorm.pdf,https://arxiv.org/pdf/1502.03167.pdf
+adam.pdf,https://arxiv.org/pdf/1412.6980.pdf
