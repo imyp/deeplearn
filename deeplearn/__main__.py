@@ -16,7 +16,6 @@ net = model.LinearReluStack()
 loss_function: model.TypedModel = (
     nn.MSELoss()
 )  # pyright: ignore[reportGeneralTypeIssues]
-# optimizer = optim.SGD(net.parameters(), lr=learning_rate)
 optimizer = optim.Adam(net.parameters(), lr=learning_rate)
 model_name = "relu-linear-stack.pt"
 loss_name = "epoch_train_test_adam.data"
@@ -30,4 +29,3 @@ train.train_test_loops(
     model_name,
     loss_name,
 )
-plot.plot_test_train_data(loss_name)
