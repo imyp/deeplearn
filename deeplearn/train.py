@@ -55,6 +55,8 @@ def train_test_loops(
     optimizer: optim.Optimizer,
     net: model.TypedModel,
     loss_fn: model.TypedModel,
+    model_name: str,
+    loss_name: str
 ):
     info: list[list[float]] = []
     for t in range(epochs):
@@ -62,6 +64,6 @@ def train_test_loops(
         train_loss = loop(train_loader, net, loss_fn, optimizer)
         test_loss = test_loop(test_loader, net, loss_fn)
         info.append([t,train_loss, test_loss])
-    torch.save(torch.Tensor(info), "epoch_train_test.data") # pyright: ignore[reportUnknownMemberType]
-    torch.save(net.state_dict(), "model.pt") # pyright: ignore[reportUnknownMemberType]
+    torch.save(torch.Tensor(info), loss_name) # pyright: ignore[reportUnknownMemberType]
+    torch.save(net.state_dict(), model_name) # pyright: ignore[reportUnknownMemberType]
     print("Done!")
