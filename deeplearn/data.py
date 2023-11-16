@@ -98,6 +98,37 @@ class SphereDataset(data.Dataset[TorchTuple]):
         sphere_volume = create_volumetric_sphere(sphere)
         return sphere_volume, sphere.to_tensor()
 
+    def to_file(self, filename: str) -> None:
+        x, y = self[0]
+
+        Xs = torch.empty((len(self), *x.shape))
+        Ys = torch.empty((len(self), *y.shape))
+        i = 0
+        for x, y in self:
+            Xs[i] = x
+            Ys[i] = y
+            i += 1
+
+        torch.save(Xs, filename + ".X.data")  # pyright: ignore[reportUnknownMemberType]
+        torch.save(Ys, filename + ".Y.data")  # pyright: ignore[reportUnknownMemberType]
+
+
+class FileSphereDataset(data.Dataset[TorchTuple]):
+    def __init__(self, filename: str) -> None:
+        super().__init__()
+        self._X = torch.load(  # pyright: ignore[reportUnknownMemberType]
+            filename + ".X.data"
+        )
+        self._Y = torch.load(  # pyright: ignore[reportUnknownMemberType]
+            filename + ".Y.data"
+        )
+
+    def __len__(self):
+        return len(self._X)
+
+    def __getitem__(self, index: int) -> TorchTuple:
+        return (self._X[index], self._Y[index])
+
 
 def iter_loader(loader: Loader[T]) -> typing.Iterable[T]:
     """Iterate through a data loader while preserving types."""
