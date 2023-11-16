@@ -52,8 +52,8 @@ def create_volumetric_sphere(sphere: Sphere) -> torch.Tensor:
     )
     noise = 0.1 * (random.rand(*GRID.x.shape) - 0.5)
     return torch.from_numpy(  # pyright: ignore[reportUnknownMemberType]
-        numpy.exp(-100 * (dist_to_center - sphere.r + noise) ** 2)
-    )
+        numpy.exp(-100 * (dist_to_center - sphere.r + noise) ** 2),
+    ).to(torch.float)
 
 
 def create_random_sphere(
@@ -70,8 +70,8 @@ def create_random_sphere(
 class SphereDataset(data.Dataset[tuple[torch.Tensor, torch.Tensor]]):
     def __init__(self, length: int, overlap_allowed: bool = True) -> None:
         super().__init__()
-        radii = numpy.linspace(0.2, 0.5, 5, dtype=numpy.float64)
-        coordinate = numpy.linspace(-1, 1, 5, dtype=numpy.float64)
+        radii = numpy.linspace(0.2, 0.5, 5)
+        coordinate = numpy.linspace(-1, 1, 5)
         self._spheres: list[Sphere] = []
         tries = 0
         while len(self._spheres) < length:
