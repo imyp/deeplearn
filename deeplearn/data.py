@@ -12,6 +12,12 @@ import torch.utils.data as data
 
 Float3DArray = numpy.ndarray[tuple[int, int, int], numpy.dtype[numpy.float64]]
 
+Loader = data.DataLoader
+
+TorchTuple = tuple[torch.Tensor, torch.Tensor]
+
+T = typing.TypeVar("T")
+
 
 @dataclasses.dataclass
 class Grid:
@@ -67,7 +73,7 @@ def create_random_sphere(
     return Sphere(*coordinates, float(radius))
 
 
-class SphereDataset(data.Dataset[tuple[torch.Tensor, torch.Tensor]]):
+class SphereDataset(data.Dataset[TorchTuple]):
     def __init__(self, length: int, overlap_allowed: bool = True) -> None:
         super().__init__()
         radii = numpy.linspace(0.2, 0.5, 5)
@@ -87,15 +93,10 @@ class SphereDataset(data.Dataset[tuple[torch.Tensor, torch.Tensor]]):
     def __len__(self):
         return len(self._spheres)
 
-    def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self, index: int) -> TorchTuple:
         sphere = self._spheres[index]
         sphere_volume = create_volumetric_sphere(sphere)
         return sphere_volume, sphere.to_tensor()
-
-
-Loader = data.DataLoader
-
-T = typing.TypeVar("T")
 
 
 def iter_loader(loader: Loader[T]) -> typing.Iterable[T]:

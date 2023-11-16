@@ -1,9 +1,25 @@
 """Plot dataset."""
+import torch.nn as nn
+import torch.optim as optim
+
 import deeplearn.data as data
-import deeplearn.plot as plot
+import deeplearn.model as model
+import deeplearn.train as train
 
-spheres = [pair[0] for pair in data.SphereDataset(10)]
-initial_sphere = spheres.pop()
-values = sum(spheres, start=initial_sphere)
+learning_rate = 1e-3
+batch_size = 2
+epochs = 5
+size = 1000
+dataset = data.SphereDataset(size)
+loader = data.Loader(dataset, batch_size)
+net = model.LinearReluStack()
+loss_function: model.TypedModel = (
+    nn.MSELoss()
+)  # pyright: ignore[reportGeneralTypeIssues]
+optimizer = optim.SGD(net.parameters(), lr=learning_rate)
 
-plot.plot_volume(values)
+for t in range(epochs):
+    print(f"Epoch {t+1}\n-------------------------------")
+    train.loop(loader, net, loss_function, optimizer)
+    train.test_loop(loader, net, loss_function)
+print("Done!")
