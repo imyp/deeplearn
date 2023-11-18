@@ -4,13 +4,8 @@ import dataclasses
 import math
 import typing
 
-import numpy
-import numpy.random as random
-import numpy.typing as ntyping
 import torch
 import torch.utils.data as data
-
-Float3DArray = numpy.ndarray[tuple[int, int, int], numpy.dtype[numpy.float64]]
 
 Loader = data.DataLoader
 
@@ -18,13 +13,11 @@ TorchTuple = tuple[torch.Tensor, torch.Tensor]
 
 T = typing.TypeVar("T")
 
-
 @dataclasses.dataclass
 class Grid:
-    x: Float3DArray
-    y: Float3DArray
-    z: Float3DArray
-
+    x: torch.Tensor
+    y: torch.Tensor
+    z: torch.Tensor
 
 @dataclasses.dataclass
 class Sphere:
@@ -39,96 +32,71 @@ class Sphere:
         )
         return distance < (self.r + other.r)
 
-    def overlaps_any(self, spheres: list[typing.Self]) -> bool:
-        for s in spheres:
-            if self.overlaps(s):
-                return True
-        return False
-
-    def to_tensor(self) -> torch.Tensor:
-        return torch.Tensor([self.x, self.y, self.z, self.r])
-
-
-GRID = Grid(*numpy.mgrid[-2:2:40j, -2:2:40j, -2:2:40j])
-
-
-def create_volumetric_sphere(sphere: Sphere) -> torch.Tensor:
-    dist_to_center = numpy.sqrt(
-        (GRID.x - sphere.x) ** 2 + (GRID.y - sphere.y) ** 2 + (GRID.z - sphere.z) ** 2
-    )
-    noise = 0.1 * (random.rand(*GRID.x.shape) - 0.5)
-    return torch.from_numpy(  # pyright: ignore[reportUnknownMemberType]
-        numpy.exp(-100 * (dist_to_center - sphere.r + noise) ** 2),
-    ).to(torch.float)
-
-
-def create_random_sphere(
-    possible_radii: ntyping.NDArray[numpy.float64],
-    possible_coordinates: ntyping.NDArray[numpy.float64],
-) -> Sphere:
-    coordinates: tuple[float, float, float] = tuple(
-        random.choice(possible_coordinates, 3)
-    )  # pyright: ignore[reportGeneralTypeIssues]
-    radius: float = random.choice(possible_radii)
-    return Sphere(*coordinates, float(radius))
-
-
 class SphereDataset(data.Dataset[TorchTuple]):
-    def __init__(self, length: int, overlap_allowed: bool = True) -> None:
+    def __init__(self, spheres: torch.Tensor, volumes: torch.Tensor) -> None:
         super().__init__()
-        radii = numpy.linspace(0.2, 0.5, 5)
-        coordinate = numpy.linspace(-1, 1, 5)
-        self._spheres: list[Sphere] = []
-        tries = 0
-        while len(self._spheres) < length:
-            sphere = create_random_sphere(radii, coordinate)
-            if not overlap_allowed and sphere.overlaps_any(self._spheres):
-                tries += 1
-                continue
-            if tries > 100:
-                raise ValueError("Could not create a suitable sphere after 20 tries")
-            self._spheres.append(sphere)
-            tries = 0
+        self._spheres = spheres
+        self._volumes = volumes
 
     def __len__(self):
         return len(self._spheres)
 
     def __getitem__(self, index: int) -> TorchTuple:
-        sphere = self._spheres[index]
-        sphere_volume = create_volumetric_sphere(sphere)
-        return sphere_volume, sphere.to_tensor()
-
-    def to_file(self, filename: str) -> None:
-        x, y = self[0]
-
-        Xs = torch.empty((len(self), *x.shape))
-        Ys = torch.empty((len(self), *y.shape))
-        i = 0
-        for x, y in self:
-            Xs[i] = x
-            Ys[i] = y
-            i += 1
-
-        torch.save(Xs, filename + ".X.data")  # pyright: ignore[reportUnknownMemberType]
-        torch.save(Ys, filename + ".Y.data")  # pyright: ignore[reportUnknownMemberType]
-
-
-class FileSphereDataset(data.Dataset[TorchTuple]):
-    def __init__(self, filename: str) -> None:
-        super().__init__()
-        self._X = torch.load(  # pyright: ignore[reportUnknownMemberType]
+        return self._volumes[index], self._spheres[index] 
+    
+    @classmethod
+    def generate(cls, size: int):
+        """Generate a dataset with a specific size."""
+        spheres = create_n_spheres(n=size)
+        volumes = create_volumes(spheres=spheres)
+        return cls(spheres=spheres, volumes=volumes)
+    
+    @classmethod
+    def from_file(cls, filename: str):
+        spheres = torch.load(  # pyright: ignore[reportUnknownMemberType]
             filename + ".X.data"
         )
-        self._Y = torch.load(  # pyright: ignore[reportUnknownMemberType]
+        volumes = torch.load(  # pyright: ignore[reportUnknownMemberType]
             filename + ".Y.data"
         )
+        return cls(spheres=spheres, volumes=volumes)
+    
+    def to_file(self, filename: str):
+        torch.save(self._spheres, filename + ".X.data")  # pyright: ignore[reportUnknownMemberType]
+        torch.save(self._volumes, filename + ".Y.data")  # pyright: ignore[reportUnknownMemberType]
 
-    def __len__(self):
-        return len(self._X)
+def create_n_spheres(n: int)->torch.Tensor:
+    random_values = torch.rand((n, 4))
+    diff = torch.tensor([0.5, 0.5, 0.5, 0]).repeat(n,1)
+    return random_values - diff
 
-    def __getitem__(self, index: int) -> TorchTuple:
-        return (self._X[index], self._Y[index])
 
+def create_grid(min_value: int, max_value: int, res:int)->Grid:
+    grid_axis = torch.linspace(min_value, max_value, res)
+    grid_tuple = torch.meshgrid([grid_axis, grid_axis, grid_axis], indexing="xy")
+    return Grid(*grid_tuple)
+
+GRID_RESOLUTION = 40
+GRID = create_grid(-2, 2, GRID_RESOLUTION)
+
+def create_volumes(spheres: torch.Tensor)->torch.Tensor:
+    shape = spheres.shape
+    assert len(shape) == 2
+    assert shape[1] == 4
+    n = shape[0]
+    result_shape = (n,GRID_RESOLUTION, GRID_RESOLUTION, GRID_RESOLUTION)
+    coordinate_shape = (n,1,1,1)
+    X = GRID.x.repeat(*coordinate_shape)
+    Y = GRID.y.repeat(*coordinate_shape)
+    Z = GRID.z.repeat(*coordinate_shape)
+    cX = spheres[:, 0].reshape(coordinate_shape)
+    cY = spheres[:, 1].reshape(coordinate_shape)
+    cZ = spheres[:, 2].reshape(coordinate_shape)
+    cR = spheres[:, 3].reshape(coordinate_shape)
+    dist = torch.sqrt((X-cX)**2+(Y-cY)**2+(Z-cZ)**2) - cR
+    result = torch.exp(- 100 * dist ** 2)
+    assert result.shape == result_shape
+    return result
 
 def iter_loader(loader: Loader[T]) -> typing.Iterable[T]:
     """Iterate through a data loader while preserving types."""

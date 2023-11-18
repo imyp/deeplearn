@@ -8,17 +8,22 @@ import torch
 import deeplearn.data as data
 
 
-def plot_volume(volume_data: torch.Tensor) -> None:
+def plot_volumes(volumes: torch.Tensor) -> None:
     """Create a volumetric plot of values in grid."""
-    volume_data_numpy = volume_data.numpy()
-    assert volume_data_numpy.shape == data.GRID.x.shape
+    shape = volumes.shape
+    grid_shape = data.GRID.x.shape
+    assert len(shape) == 4
+    assert shape[1] == grid_shape[0]
+    assert shape[2] == grid_shape[1]
+    assert shape[3] == grid_shape[2]
+    volumes = volumes.sum(dim=0)
     d = graph_objects.Volume(
         x=data.GRID.x.flatten(),
         y=data.GRID.y.flatten(),
         z=data.GRID.z.flatten(),
-        value=volume_data_numpy.flatten(),
-        isomin=volume_data_numpy.min(),
-        isomax=volume_data_numpy.max(),
+        value=volumes.flatten(),
+        isomin=volumes.min().item(),
+        isomax=volumes.max().item(),
         opacity=0.1,
         surface_count=20,
     )
