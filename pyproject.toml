@@ -12,6 +12,7 @@ numpy = "^1.26.2"
 matplotlib = "^3.8.1"
 plotly = "^5.18.0"
 kaleido = "0.2.1"
+hydra-core = "^1.3.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -30,6 +31,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 download = "deeplearn.papers:download_papers"
+train = "cli:train"
 
 [tool.pyright]
 venvPath = "."

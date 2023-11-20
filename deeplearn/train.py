@@ -1,15 +1,16 @@
 """Training functionality."""
 import torch
-import torch.optim as optim
 
 import deeplearn.data as data
+import deeplearn.loss as loss
 import deeplearn.model as model
+import deeplearn.optim as optim
 
 
 def loop(
     loader: data.Loader[data.TorchTuple],
-    net: model.TypedModel,
-    loss_fn: model.TypedModel,
+    net: model.Model,
+    loss_fn: loss.LossFunction,
     optimizer: optim.Optimizer,
 ) -> float:
     size = len(loader.dataset)  # pyright: ignore[reportGeneralTypeIssues]
@@ -17,24 +18,21 @@ def loop(
     net.train()
     for batch, (X, y) in enumerate(data.iter_loader(loader)):
         pred = net(X)
-        loss = loss_fn(pred, y)
+        batch_loss = loss_fn(pred, y)
 
-        loss.backward()  # pyright: ignore[reportUnknownMemberType]
-        optimizer.step()
-        optimizer.zero_grad()
+        batch_loss.backward()  # pyright: ignore[reportUnknownMemberType]
+        optimizer.step_zero()
 
         if batch % 20 == 0:
-            loss_float, current = loss.item(), (batch + 1) * len(X)
+            loss_float, current = batch_loss.item(), (batch + 1) * len(X)
             print(f"loss: {loss_float:>7f} [{current:>5d}/{size}]")
         if batch == last_batch:
-            return loss.item()
+            return batch_loss.item()
     raise RuntimeError
 
 
 def test_loop(
-    loader: data.Loader[data.TorchTuple],
-    net: model.TypedModel,
-    loss_fn: model.TypedModel,
+    loader: data.Loader[data.TorchTuple], net: model.Model, loss_fn: loss.LossFunction
 ) -> float:
     net.eval()
     batches = len(loader)
@@ -54,8 +52,8 @@ def train_test_loops(
     train_loader: data.Loader[data.TorchTuple],
     test_loader: data.Loader[data.TorchTuple],
     optimizer: optim.Optimizer,
-    net: model.TypedModel,
-    loss_fn: model.TypedModel,
+    net: model.Model,
+    loss_fn: loss.LossFunction,
     model_name: str,
     loss_name: str,
 ):

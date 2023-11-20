@@ -1,0 +1,16 @@
+epochs: 8
+model:
+  _target_: deeplearn.model.Model
+  name: linear-relu-stack
+optimizer:
+  _target_: deeplearn.optim.Optimizer
+  algorithm: adam
+  learning_rate: 0.001
+loss:
+  _target_: deeplearn.loss.LossFunction
+  name: mse
+data:
+  name: sphere
+  train: train
+  test: test
+  batch_size: 10
