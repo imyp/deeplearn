@@ -17,6 +17,6 @@ partial_data:
   _partial_: true
   _target_: deeplearn.data.Data
   type_: sphere
-  train: train
-  test: test
+  train: data/train
+  test: data/test
   batch_size: 10

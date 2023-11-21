@@ -20,3 +20,10 @@ def train(cfg: omegaconf.DictConfig)->None:
     partial_data = hutils.instantiate(cfg.partial_data)
     datasets: data.Data = partial_data(base=pathlib.Path(hutils.get_original_cwd()))
     train_module.train(cfg.epochs, datasets, optimizer, network, loss_fn)
+
+def generate_data():
+    """Generate a train and test dataset."""
+    data_dir = pathlib.Path.cwd() / "data"
+    data_dir.mkdir(exist_ok=True)
+    data.SphereDataset.generate(1000).to_file(str(data_dir/"train"))
+    data.SphereDataset.generate(500).to_file(str(data_dir/"test"))
