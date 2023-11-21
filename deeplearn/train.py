@@ -47,24 +47,21 @@ def test_loop(
     return test_loss
 
 
-def train_test_loops(
+def train(
     epochs: int,
-    train_loader: data.Loader[data.TorchTuple],
-    test_loader: data.Loader[data.TorchTuple],
+    dataset: data.Data,
     optimizer: optim.Optimizer,
     net: model.Model,
     loss_fn: loss.LossFunction,
-    model_name: str,
-    loss_name: str,
 ):
     info: list[list[float]] = []
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
-        train_loss = loop(train_loader, net, loss_fn, optimizer)
-        test_loss = test_loop(test_loader, net, loss_fn)
+        train_loss = loop(dataset.train, net, loss_fn, optimizer)
+        test_loss = test_loop(dataset.test, net, loss_fn)
         info.append([t, train_loss, test_loss])
     torch.save(  # pyright: ignore[reportUnknownMemberType]
-        torch.Tensor(info), loss_name
+        torch.Tensor(info), loss_fn.name
     )
-    torch.save(net.state_dict(), model_name)  # pyright: ignore[reportUnknownMemberType]
+    torch.save(net.state_dict(), net.name)  # pyright: ignore[reportUnknownMemberType]
     print("Done!")

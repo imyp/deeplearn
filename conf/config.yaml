@@ -1,16 +1,22 @@
+hydra:
+  job:
+    chdir: true
 epochs: 8
 model:
   _target_: deeplearn.model.Model
   name: linear-relu-stack
-optimizer:
+partial_optim:
+  _partial_: true
   _target_: deeplearn.optim.Optimizer
   algorithm: adam
   learning_rate: 0.001
 loss:
   _target_: deeplearn.loss.LossFunction
   name: mse
-data:
-  name: sphere
+partial_data:
+  _partial_: true
+  _target_: deeplearn.data.Data
+  type_: sphere
   train: train
   test: test
   batch_size: 10

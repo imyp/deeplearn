@@ -18,6 +18,7 @@ class Model:
         match name:
             case "linear-relu-stack":
                 self._model = LinearReluStack()
+        self.name = name
 
     def parameters(self) -> typing.Iterator[nn.Parameter]:
         return self._model.parameters()

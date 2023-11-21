@@ -132,3 +132,26 @@ def iter_loader(loader: Loader[T]) -> typing.Iterable[T]:
     for b in loader:
         batch: T = b
         yield batch
+
+
+DataType: typing.TypeAlias = typing.Literal["sphere"]
+
+
+class Data:
+    def __init__(
+        self,
+        type_: DataType,
+        batch_size: int,
+        train: str,
+        test: str,
+        base: pathlib.Path,
+    ):
+        match type_:
+            case "sphere":
+                self._data_type = SphereDataset
+        self.train = Loader(
+            self._data_type.from_file(str(base / train)), batch_size=batch_size
+        )
+        self.test = Loader(
+            self._data_type.from_file(str(base / test)), batch_size=batch_size
+        )
