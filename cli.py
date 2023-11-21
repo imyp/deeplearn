@@ -8,7 +8,9 @@ import deeplearn.model as model
 import deeplearn.loss as loss
 import deeplearn.data as data
 import deeplearn.train as train_module
+import deeplearn.plot as plot
 import pathlib
+import sys 
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def train(cfg: omegaconf.DictConfig)->None:
@@ -27,3 +29,11 @@ def generate_data():
     data_dir.mkdir(exist_ok=True)
     data.SphereDataset.generate(1000).to_file(str(data_dir/"train"))
     data.SphereDataset.generate(500).to_file(str(data_dir/"test"))
+
+def plot_dir():
+    if len(sys.argv) != 2:
+        raise RuntimeError("Expected one argument.")
+    file_path = pathlib.Path(sys.argv[1])
+    if not file_path.exists():
+        raise RuntimeError(f"File {file_path} does not exist.")
+    plot.loss_file(str(file_path))
