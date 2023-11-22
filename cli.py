@@ -1,19 +1,26 @@
-"""Command line interface"""
+"""
+Deep learning command line interface
+
+This module contains the commands for training a neural network.
+"""
+
+import pathlib
+import sys
 
 import hydra
 import hydra.utils as hutils
 import omegaconf
-import deeplearn.optim as optim
-import deeplearn.model as model
-import deeplearn.loss as loss
+
 import deeplearn.data as data
-import deeplearn.train as train_module
+import deeplearn.loss as loss
+import deeplearn.model as model
+import deeplearn.optim as optim
 import deeplearn.plot as plot
-import pathlib
-import sys 
+import deeplearn.train as train_module
+
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
-def train(cfg: omegaconf.DictConfig)->None:
+def train(cfg: omegaconf.DictConfig) -> None:
     """Train model from configurations specified in configuration file."""
     network: model.Model = hutils.instantiate(cfg.model)
     partial_optim = hutils.instantiate(cfg.partial_optim)
@@ -23,12 +30,14 @@ def train(cfg: omegaconf.DictConfig)->None:
     datasets: data.Data = partial_data(base=pathlib.Path(hutils.get_original_cwd()))
     train_module.train(cfg.epochs, datasets, optimizer, network, loss_fn)
 
+
 def generate_data():
     """Generate a train and test dataset."""
     data_dir = pathlib.Path.cwd() / "data"
     data_dir.mkdir(exist_ok=True)
-    data.SphereDataset.generate(1000).to_file(str(data_dir/"train"))
-    data.SphereDataset.generate(500).to_file(str(data_dir/"test"))
+    data.SphereDataset.generate(1000).to_file(str(data_dir / "train"))
+    data.SphereDataset.generate(500).to_file(str(data_dir / "test"))
+
 
 def plot_dir():
     if len(sys.argv) != 2:
