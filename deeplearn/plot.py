@@ -59,4 +59,4 @@ def loss_file(filename: str):
     t = torch.load(filename)  # pyright: ignore[reportUnknownMemberType]
     _plot_data_to_ax(ax, t, suffix="")
     ax.legend()  # pyright: ignore[reportUnknownMemberType]
-    pyplot.show()  # pyright: ignore[reportUnknownMemberType]
+    figure.savefig("image.png") # pyright: ignore[reportUnknownMemberType]

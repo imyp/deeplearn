@@ -1,7 +1,7 @@
 hydra:
   job:
     chdir: true
-epochs: 8
+epochs: 20
 model:
   _target_: deeplearn.model.Model
   name: linear-relu-stack
